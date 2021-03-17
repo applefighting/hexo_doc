@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="永续合约Perpetual Swap 个人学习研究永续合约的一些笔记整理  资金费用 funding资金费用&#x3D;仓位价值*资金费率资金费率为正，多头向空头支付；为负，则空头向多头支付资金费率 溢价指数 (P) + clamp (利率 (I) - 溢价指数 (P), 0.05%, -0.05%)  溢价&#x2F;折价 溢价指数 (P) &#x3D; ( Max ( 0 , 深度加权买价 - 标记价格) - Max (">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Perpetual Swap">
+<meta property="og:url" content="https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/index.html">
+<meta property="og:site_name" content="Hello">
+<meta property="og:description" content="永续合约Perpetual Swap 个人学习研究永续合约的一些笔记整理  资金费用 funding资金费用&#x3D;仓位价值*资金费率资金费率为正，多头向空头支付；为负，则空头向多头支付资金费率 溢价指数 (P) + clamp (利率 (I) - 溢价指数 (P), 0.05%, -0.05%)  溢价&#x2F;折价 溢价指数 (P) &#x3D; ( Max ( 0 , 深度加权买价 - 标记价格) - Max (">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-04-14T14:05:04.000Z">
+<meta property="article:modified_time" content="2020-08-11T14:51:18.000Z">
+<meta property="article:author" content="Jason Li">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Perpetual Swap</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2020/08/11/%E6%AF%94%E7%89%B9%E5%B8%81%E7%99%BD%E7%9A%AE%E4%B9%A6%E7%BF%BB%E8%AF%91/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2018/10/28/Navalism-%E2%80%94-Quotes-Perceptions-by-Naval-Ravikant/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/&text=Perpetual Swap"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/&title=Perpetual Swap"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/&is_video=false&description=Perpetual Swap"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Perpetual Swap&body=Check out this article: https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/&title=Perpetual Swap"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/&title=Perpetual Swap"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/&title=Perpetual Swap"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/&title=Perpetual Swap"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/&name=Perpetual Swap&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/&t=Perpetual Swap"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B0%B8%E7%BB%AD%E5%90%88%E7%BA%A6Perpetual-Swap"><span class="toc-number">1.</span> <span class="toc-text">永续合约Perpetual Swap</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B5%84%E9%87%91%E8%B4%B9%E7%94%A8-funding"><span class="toc-number">1.1.</span> <span class="toc-text">资金费用 funding</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B5%84%E9%87%91%E8%B4%B9%E7%94%A8-%E4%BB%93%E4%BD%8D%E4%BB%B7%E5%80%BC-%E8%B5%84%E9%87%91%E8%B4%B9%E7%8E%87"><span class="toc-number">1.1.1.</span> <span class="toc-text">资金费用&#x3D;仓位价值*资金费率</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B5%84%E9%87%91%E8%B4%B9%E7%8E%87%E4%B8%BA%E6%AD%A3%EF%BC%8C%E5%A4%9A%E5%A4%B4%E5%90%91%E7%A9%BA%E5%A4%B4%E6%94%AF%E4%BB%98%EF%BC%9B%E4%B8%BA%E8%B4%9F%EF%BC%8C%E5%88%99%E7%A9%BA%E5%A4%B4%E5%90%91%E5%A4%9A%E5%A4%B4%E6%94%AF%E4%BB%98"><span class="toc-number">1.1.2.</span> <span class="toc-text">资金费率为正，多头向空头支付；为负，则空头向多头支付</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B5%84%E9%87%91%E8%B4%B9%E7%8E%87"><span class="toc-number">1.1.3.</span> <span class="toc-text">资金费率</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BA%A2%E4%BB%B7-%E6%8A%98%E4%BB%B7"><span class="toc-number">1.1.4.</span> <span class="toc-text">溢价&#x2F;折价</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%80%9F%E8%B4%B7%E5%88%A9%E7%8E%87"><span class="toc-number">1.1.5.</span> <span class="toc-text">借贷利率</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B4%B9%E7%94%A8%E5%91%A8%E6%9C%9F"><span class="toc-number">1.1.6.</span> <span class="toc-text">费用周期</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B5%84%E9%87%91%E8%B4%B9%E7%94%A8%E5%88%92%E8%BD%AC%E5%90%8E%E4%BA%A7%E7%94%9F%E5%B7%B2%E5%AE%9E%E7%8E%B0%E6%94%B6%E7%9B%8A"><span class="toc-number">1.1.7.</span> <span class="toc-text">资金费用划转后产生已实现收益</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B5%84%E9%87%91%E8%B4%B9%E7%94%A8%E5%88%92%E8%BD%AC%E5%90%8E%EF%BC%8C%E5%86%BB%E7%BB%93%E4%BF%9D%E8%AF%81%E9%87%91%E5%8F%8A%E7%88%86%E4%BB%93%E4%BB%B7%E5%8F%AF%E8%83%BD%E4%BC%9A%E5%8F%91%E7%94%9F%E5%8F%98%E5%8C%96"><span class="toc-number">1.1.8.</span> <span class="toc-text">资金费用划转后，冻结保证金及爆仓价可能会发生变化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%87%E8%AE%B0%E4%BB%B7%E6%A0%BCfair-price-mark"><span class="toc-number">1.2.</span> <span class="toc-text">标记价格fair price mark</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%81%BF%E5%85%8D%E5%9C%A8%E9%AB%98%E6%9D%A0%E6%9D%86%E4%BA%A7%E5%93%81%E4%B8%8A%E5%8F%91%E7%94%9F%E4%B8%8D%E5%BF%85%E8%A6%81%E7%9A%84%E5%BC%BA%E5%88%B6%E5%B9%B3%E4%BB%93"><span class="toc-number">1.2.1.</span> <span class="toc-text">避免在高杠杆产品上发生不必要的强制平仓</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%87%E6%95%B0%E4%BB%B7%E6%A0%BC"><span class="toc-number">1.2.2.</span> <span class="toc-text">指数价格</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97%EF%BC%9A%E6%8C%87%E6%95%B0%E4%BB%B7%E6%A0%BC%E5%8A%A0%E4%B8%8A%E9%9A%8F%E6%97%B6%E9%97%B4%E9%80%92%E5%87%8F%E7%9A%84%E8%B5%84%E9%87%91%E8%B4%B9%E7%94%A8%E5%9F%BA%E5%B7%AE"><span class="toc-number">1.2.3.</span> <span class="toc-text">计算：指数价格加上随时间递减的资金费用基差</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E4%BA%8E%E8%AE%A1%E7%AE%97%E6%9C%AA%E5%AE%9E%E7%8E%B0%E6%94%B6%E7%9B%8A"><span class="toc-number">1.2.4.</span> <span class="toc-text">用于计算未实现收益</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E4%BA%8E%E5%BC%BA%E5%88%B6%E5%B9%B3%E4%BB%93%E7%9A%84%E8%A7%A6%E5%8F%91%E4%BB%B7%E6%A0%BC"><span class="toc-number">1.2.5.</span> <span class="toc-text">用于强制平仓的触发价格</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A3%E5%90%91%E5%8F%8D%E5%90%91"><span class="toc-number">1.3.</span> <span class="toc-text">正向反向</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A3%E5%90%91%EF%BC%88%E7%BA%BF%E6%80%A7%EF%BC%89%EF%BC%9Ausd%E5%81%9A%E4%BF%9D%E8%AF%81%E9%87%91%E5%8F%8A%E6%94%B6%E7%9B%8A%E7%BB%93%E7%AE%97"><span class="toc-number">1.3.1.</span> <span class="toc-text">正向（线性）：usd做保证金及收益结算</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%8D%E5%90%91%EF%BC%9A%E6%A0%87%E7%9A%84%E7%89%A9btc%E5%81%9A%E4%BF%9D%E8%AF%81%E9%87%91%E5%8F%8A%E7%BB%93%E7%AE%97"><span class="toc-number">1.3.2.</span> <span class="toc-text">反向：标的物btc做保证金及结算</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%88%E7%BA%A6%E4%BA%A4%E6%98%93trade"><span class="toc-number">1.4.</span> <span class="toc-text">合约交易trade</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8B%E5%8D%95place-order"><span class="toc-number">1.4.1.</span> <span class="toc-text">下单place order</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A7%94%E6%89%98%E7%B1%BB%E5%9E%8Border-type"><span class="toc-number">1.4.2.</span> <span class="toc-text">委托类型order type</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%92%AE%E5%90%88match"><span class="toc-number">1.4.3.</span> <span class="toc-text">撮合match</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%88%E4%BA%8F%E8%AE%A1%E7%AE%97PNL"><span class="toc-number">1.4.4.</span> <span class="toc-text">盈亏计算PNL</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%8B%E7%BB%AD%E8%B4%B9%E7%8E%87fee"><span class="toc-number">1.5.</span> <span class="toc-text">手续费率fee</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#maker"><span class="toc-number">1.5.1.</span> <span class="toc-text">maker</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#taker"><span class="toc-number">1.5.2.</span> <span class="toc-text">taker</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%BA%E5%B9%B3%E8%B4%B9%E7%8E%87"><span class="toc-number">1.5.3.</span> <span class="toc-text">强平费率</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%82%E5%9C%BA%E4%B8%AD%E6%96%AD%E4%BA%8B%E4%BB%B6-MDE"><span class="toc-number">1.6.</span> <span class="toc-text">市场中断事件(MDE)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Market-Disruption-Event"><span class="toc-number">1.6.1.</span> <span class="toc-text">Market Disruption Event</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%BA%E5%88%B6%E5%B9%B3%E4%BB%93liquidated"><span class="toc-number">1.7.</span> <span class="toc-text">强制平仓liquidated</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B9%B3%E4%BB%93%E4%BB%B7%E6%A0%BC"><span class="toc-number">1.7.1.</span> <span class="toc-text">平仓价格</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%BA%E5%B9%B3%E8%BF%87%E7%A8%8B"><span class="toc-number">1.7.2.</span> <span class="toc-text">强平过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A9%BF%E4%BB%93"><span class="toc-number">1.7.3.</span> <span class="toc-text">穿仓</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%9D%E9%99%A9%E5%9F%BA%E9%87%91"><span class="toc-number">1.7.4.</span> <span class="toc-text">保险基金</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%8A%A8%E5%87%8F%E4%BB%93"><span class="toc-number">1.7.5.</span> <span class="toc-text">自动减仓</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%9A%84%E4%BA%A4%E6%98%93%E8%AE%B0%E5%BD%95"><span class="toc-number">1.7.6.</span> <span class="toc-text">用户的交易记录</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%9D%E8%AF%81%E9%87%91margin"><span class="toc-number">1.8.</span> <span class="toc-text">保证金margin</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B5%B7%E5%A7%8B%E4%BF%9D%E8%AF%81%E9%87%91"><span class="toc-number">1.8.1.</span> <span class="toc-text">起始保证金</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%B4%E6%8C%81%E4%BF%9D%E8%AF%81%E9%87%91"><span class="toc-number">1.8.2.</span> <span class="toc-text">维持保证金</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A3%8E%E9%99%A9%E9%99%90%E9%A2%9D"><span class="toc-number">1.8.3.</span> <span class="toc-text">风险限额</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%A8%E4%BB%93%E9%80%90%E4%BB%93"><span class="toc-number">1.8.4.</span> <span class="toc-text">全仓逐仓</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8C%E6%97%B6%E6%9C%89%E4%B9%B0%E5%8D%96%E5%A7%94%E6%89%98"><span class="toc-number">1.8.5.</span> <span class="toc-text">同时有买卖委托</span></a></li></ol></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Perpetual Swap
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Jason Li</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-04-14T14:05:04.000Z" itemprop="datePublished">2020-04-14</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="永续合约Perpetual-Swap"><a href="#永续合约Perpetual-Swap" class="headerlink" title="永续合约Perpetual Swap"></a>永续合约Perpetual Swap</h1><blockquote>
+<p>个人学习研究永续合约的一些笔记整理</p>
+</blockquote>
+<h2 id="资金费用-funding"><a href="#资金费用-funding" class="headerlink" title="资金费用 funding"></a>资金费用 funding</h2><h3 id="资金费用-仓位价值-资金费率"><a href="#资金费用-仓位价值-资金费率" class="headerlink" title="资金费用=仓位价值*资金费率"></a>资金费用=仓位价值*资金费率</h3><h3 id="资金费率为正，多头向空头支付；为负，则空头向多头支付"><a href="#资金费率为正，多头向空头支付；为负，则空头向多头支付" class="headerlink" title="资金费率为正，多头向空头支付；为负，则空头向多头支付"></a>资金费率为正，多头向空头支付；为负，则空头向多头支付</h3><h3 id="资金费率"><a href="#资金费率" class="headerlink" title="资金费率"></a>资金费率</h3><ul>
+<li>溢价指数 (P) + clamp (利率 (I) - 溢价指数 (P), 0.05%, -0.05%)</li>
+</ul>
+<h3 id="溢价-折价"><a href="#溢价-折价" class="headerlink" title="溢价/折价"></a>溢价/折价</h3><ul>
+<li><p>溢价指数 (P) = ( Max ( 0 , 深度加权买价 - 标记价格) - Max ( 0 , 标记价格 - 深度加权卖价)) / 现货价格 + 标记价格的合理基差</p>
+</li>
+<li><p>合理基差率 = (深度加权中间价 / 指数价格 - 1) / (距离到期的时间 / 365)</p>
+</li>
+<li><p>合理基差   = 指数价格 * 合理基差率 * (距离到期的时间 / 365)</p>
+</li>
+<li><p>合理价格   = 指数价格 + 合理基差</p>
+</li>
+</ul>
+<h3 id="借贷利率"><a href="#借贷利率" class="headerlink" title="借贷利率"></a>借贷利率</h3><ul>
+<li><p>基础货币借贷利率</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.bitmex.com/app/index/.XBTBON">https://www.bitmex.com/app/index/.XBTBON</a></li>
+</ul>
+</li>
+<li><p>计价货币借贷利率</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.bitmex.com/app/index/.USDBON">https://www.bitmex.com/app/index/.USDBON</a></li>
+</ul>
+</li>
+</ul>
+<h3 id="费用周期"><a href="#费用周期" class="headerlink" title="费用周期"></a>费用周期</h3><ul>
+<li> 3 (因为资金每 8 小时产生)</li>
+</ul>
+<h3 id="资金费用划转后产生已实现收益"><a href="#资金费用划转后产生已实现收益" class="headerlink" title="资金费用划转后产生已实现收益"></a>资金费用划转后产生已实现收益</h3><h3 id="资金费用划转后，冻结保证金及爆仓价可能会发生变化"><a href="#资金费用划转后，冻结保证金及爆仓价可能会发生变化" class="headerlink" title="资金费用划转后，冻结保证金及爆仓价可能会发生变化"></a>资金费用划转后，冻结保证金及爆仓价可能会发生变化</h3><h2 id="标记价格fair-price-mark"><a href="#标记价格fair-price-mark" class="headerlink" title="标记价格fair price mark"></a>标记价格fair price mark</h2><h3 id="避免在高杠杆产品上发生不必要的强制平仓"><a href="#避免在高杠杆产品上发生不必要的强制平仓" class="headerlink" title="避免在高杠杆产品上发生不必要的强制平仓"></a>避免在高杠杆产品上发生不必要的强制平仓</h3><h3 id="指数价格"><a href="#指数价格" class="headerlink" title="指数价格"></a>指数价格</h3><ul>
+<li>多个主流交易所的价格加权组成</li>
+</ul>
+<h3 id="计算：指数价格加上随时间递减的资金费用基差"><a href="#计算：指数价格加上随时间递减的资金费用基差" class="headerlink" title="计算：指数价格加上随时间递减的资金费用基差"></a>计算：指数价格加上随时间递减的资金费用基差</h3><ul>
+<li><p>公式：指数价格 * (1 + 资金费用基差率)</p>
+</li>
+<li><p>资金费用基差率</p>
+<ul>
+<li>资金费率 *  (至下一个缴付资金费用的时间 / 资金费用时间间隔)</li>
+</ul>
+</li>
+<li><p>基差代表期货合约相比于标的现货价格，处于溢价还是折价；它一般是一个年化百分比。 由于期货合约是在未来到期，因此基差始终存在；到期价格的不确定性也包括了正或负的时间价值。</p>
+</li>
+</ul>
+<h3 id="用于计算未实现收益"><a href="#用于计算未实现收益" class="headerlink" title="用于计算未实现收益"></a>用于计算未实现收益</h3><h3 id="用于强制平仓的触发价格"><a href="#用于强制平仓的触发价格" class="headerlink" title="用于强制平仓的触发价格"></a>用于强制平仓的触发价格</h3><h2 id="正向反向"><a href="#正向反向" class="headerlink" title="正向反向"></a>正向反向</h2><h3 id="正向（线性）：usd做保证金及收益结算"><a href="#正向（线性）：usd做保证金及收益结算" class="headerlink" title="正向（线性）：usd做保证金及收益结算"></a>正向（线性）：usd做保证金及收益结算</h3><ul>
+<li>适合做多</li>
+<li>一张合约价值为固定单位BTC，如0.1BTC，则其usdt价值会随行情产生盈亏波动，从而影响保证金余额</li>
+</ul>
+<h3 id="反向：标的物btc做保证金及结算"><a href="#反向：标的物btc做保证金及结算" class="headerlink" title="反向：标的物btc做保证金及结算"></a>反向：标的物btc做保证金及结算</h3><ul>
+<li>适合做空</li>
+<li>反向合约，1x做空不会爆仓</li>
+<li>一张合约价值为固定单位额度usd，如1usd，则其btc价值会随行情产生盈亏波动，从而影响保证金余额</li>
+</ul>
+<h2 id="合约交易trade"><a href="#合约交易trade" class="headerlink" title="合约交易trade"></a>合约交易trade</h2><h3 id="下单place-order"><a href="#下单place-order" class="headerlink" title="下单place order"></a>下单place order</h3><ul>
+<li><p>open开仓</p>
+<ul>
+<li>open long开多</li>
+<li>open short开空</li>
+</ul>
+</li>
+<li><p>close平仓</p>
+<ul>
+<li>close long平多</li>
+<li>close short平空</li>
+</ul>
+</li>
+</ul>
+<h3 id="委托类型order-type"><a href="#委托类型order-type" class="headerlink" title="委托类型order type"></a>委托类型order type</h3><ul>
+<li><p>限价委托Limit Orders</p>
+<ul>
+<li>post-only (只做maker）</li>
+<li>IOC ( immediate or cancel)</li>
+<li>FOK (fill or kill)</li>
+</ul>
+</li>
+<li><p>市价委托Market Orders</p>
+</li>
+<li><p>止损委托Stop Orders</p>
+<ul>
+<li><p>市价止损委托Stop Market Order</p>
+</li>
+<li><p>限价止损委托Stop Limit Order</p>
+</li>
+<li><p>追踪止损委托Trailing Stop Order</p>
+<ul>
+<li>追踪价距，如果价格反向移动达到追踪价距，市价委托将被触发</li>
+<li>正的追踪价距表示追踪买委托，而负的价距代表追踪卖委托</li>
+</ul>
+</li>
+<li><p>触发价</p>
+<ul>
+<li>最新交易价格</li>
+<li>标记价格</li>
+<li>指数价格</li>
+</ul>
+</li>
+<li><p>状态事件</p>
+<ul>
+<li>未触发</li>
+<li>已触发</li>
+<li>已成交</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>止盈委托Take Profit Orders</p>
+</li>
+<li><p>高级委托Advanced Order</p>
+<ul>
+<li><p>隐藏委托Hiden Orders</p>
+<ul>
+<li>一个限价委托，但是在委托列表中不可见。</li>
+<li>一直缴付提取流动性佣金，taker</li>
+</ul>
+</li>
+<li><p>冰山委托Iceberg Orders</p>
+<ul>
+<li>一种特殊的隐藏委托，委托的一部分显示在公开的委托列表中。</li>
+<li>设置可显示委托量，优先成交隐藏量，直到隐藏委托量成交完，订单即成为普通限价委托</li>
+<li>冰山委托一直缴付提取流动性佣金，直至其隐藏数量被完全执行。之后，它变成一个普通的委托，并将获得提供流动性佣金。即隐藏部分收taker费率，显示部分收maker费率</li>
+</ul>
+</li>
+<li><p>被动委托Post Only Orders</p>
+<ul>
+<li>一种限价委托，永远不会提取流动性，也就是不会成为taker</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="撮合match"><a href="#撮合match" class="headerlink" title="撮合match"></a>撮合match</h3><ul>
+<li>价格优先</li>
+<li>时间优先</li>
+</ul>
+<h3 id="盈亏计算PNL"><a href="#盈亏计算PNL" class="headerlink" title="盈亏计算PNL"></a>盈亏计算PNL</h3><ul>
+<li><p>已实现盈亏</p>
+<ul>
+<li>因为交易手续费的原因，如果是吃单成交，则大多数情况下会立即产生已实现损失，被收取taker费率</li>
+<li>永续合约在每一轮资金费用的结算后会产生已实现盈亏</li>
+<li>用户的实际平仓成交价格产生已实现盈亏</li>
+</ul>
+</li>
+<li><p>未实现盈亏</p>
+<ul>
+<li>由标记价格计算而来</li>
+</ul>
+</li>
+</ul>
+<h2 id="手续费率fee"><a href="#手续费率fee" class="headerlink" title="手续费率fee"></a>手续费率fee</h2><h3 id="maker"><a href="#maker" class="headerlink" title="maker"></a>maker</h3><h3 id="taker"><a href="#taker" class="headerlink" title="taker"></a>taker</h3><h3 id="强平费率"><a href="#强平费率" class="headerlink" title="强平费率"></a>强平费率</h3><h2 id="市场中断事件-MDE"><a href="#市场中断事件-MDE" class="headerlink" title="市场中断事件(MDE)"></a>市场中断事件(MDE)</h2><h3 id="Market-Disruption-Event"><a href="#Market-Disruption-Event" class="headerlink" title="Market Disruption Event"></a>Market Disruption Event</h3><h2 id="强制平仓liquidated"><a href="#强制平仓liquidated" class="headerlink" title="强制平仓liquidated"></a>强制平仓liquidated</h2><h3 id="平仓价格"><a href="#平仓价格" class="headerlink" title="平仓价格"></a>平仓价格</h3><ul>
+<li>保证金余额低于维持保证金时的标记价格</li>
+<li>即仓位亏损=起始保证金-维持保证金时的标记价格</li>
+<li>保证金余额=维持保证金+taker手续费时的标记价格为强平价格（也可表示为：保证金率=维持保证金率+taker费率时的价格）</li>
+<li>保证金率=保证金余额/仓位价值</li>
+<li>全仓：保证金余额=账户余额+已实现盈亏+未实现盈亏</li>
+<li>仓位价值=（合约张数*合约面值）/标记价格</li>
+</ul>
+<h3 id="强平过程"><a href="#强平过程" class="headerlink" title="强平过程"></a>强平过程</h3><ul>
+<li><p>1.取消该合约所有未成交委托，释放保证金</p>
+</li>
+<li><p>2.如果此时还未能满足维持保证金要求，此仓位被强平引擎于破产价格接管</p>
+</li>
+<li><p>平台接管的爆仓单会计算出一个可以尽快成交、尽可能增加爆仓盈余的价格，委托到市场，可能高于破产价格，也可能低于破产价格</p>
+</li>
+<li><p>bitmex出现宕机后，平台接管的爆仓单，平台自主选择委托价位进行处理</p>
+</li>
+<li><p>系统收益及损失</p>
+<ul>
+<li>优于破产价格则进入保险基金</li>
+<li>无法在破产价格平仓，则花费保险基金在市场中平仓</li>
+<li>保险基金如果无法覆盖损失，则启动自动减仓机制</li>
+</ul>
+</li>
+</ul>
+<h3 id="穿仓"><a href="#穿仓" class="headerlink" title="穿仓"></a>穿仓</h3><ul>
+<li>破产价格</li>
+<li>爆仓单以低于破产价格平仓</li>
+</ul>
+<h3 id="保险基金"><a href="#保险基金" class="headerlink" title="保险基金"></a>保险基金</h3><ul>
+<li>保险基金额的增长来自强平委托在市场上于优于破产价的价格成交。</li>
+<li>低于破产价格的爆仓单的损失优先使用保险基金弥补</li>
+</ul>
+<h3 id="自动减仓"><a href="#自动减仓" class="headerlink" title="自动减仓"></a>自动减仓</h3><ul>
+<li><p>前提条件</p>
+<ul>
+<li>强平仓位未能够在市场平仓</li>
+<li>标记价格达到破产价格</li>
+</ul>
+</li>
+<li><p>减仓顺序决定因素</p>
+<ul>
+<li><p>杠杆</p>
+</li>
+<li><p>盈利比例</p>
+</li>
+<li><p>计算</p>
+<ul>
+<li>排序=盈利百分比 * 有效杠杆  (如果盈利)</li>
+<li>盈利百分比 / 有效杠杆  (如果亏损)</li>
+<li>有效杠杆 = abs(标记价值) / (标记价值 - 破产价值</li>
+<li> 盈利百分比 = (标记价值 - 平均开仓价值) / abs(平均开仓价值)</li>
+<li> 标记价值 = 位于标记价格时的仓位价值</li>
+<li> 破产价值 = 位于破产价格时的仓位价值</li>
+<li> 平均开仓价值 = 位于平均开仓价格时的仓位价值</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>自动减仓将根据强平仓位的破产价格进行平仓</p>
+</li>
+<li><p>优先等级</p>
+<ul>
+<li><p>指示器</p>
+<ul>
+<li>杠杆盈利比</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>触发流程</p>
+<ul>
+<li>通知用户</li>
+<li>未成交委托被取消</li>
+</ul>
+</li>
+</ul>
+<h3 id="用户的交易记录"><a href="#用户的交易记录" class="headerlink" title="用户的交易记录"></a>用户的交易记录</h3><ul>
+<li>在你的交易历史中，强平仓位在破产价格（相当于你的维持保证金为 0）被平仓。</li>
+</ul>
+<h2 id="保证金margin"><a href="#保证金margin" class="headerlink" title="保证金margin"></a>保证金margin</h2><h3 id="起始保证金"><a href="#起始保证金" class="headerlink" title="起始保证金"></a>起始保证金</h3><h3 id="维持保证金"><a href="#维持保证金" class="headerlink" title="维持保证金"></a>维持保证金</h3><ul>
+<li>平仓所需要的佣金也会加入到MM</li>
+</ul>
+<h3 id="风险限额"><a href="#风险限额" class="headerlink" title="风险限额"></a>风险限额</h3><h3 id="全仓逐仓"><a href="#全仓逐仓" class="headerlink" title="全仓逐仓"></a>全仓逐仓</h3><ul>
+<li>全仓保证金：保证金是在仓位间是分享的。 在需要时，一个合约的仓位将从账户余额中提取更多的保证金，以避免爆仓。</li>
+<li>逐仓保证金：分配给某仓位的保证金被限制在一定数额。 如果仓位的保证金跌到维持保证金水平以下，此仓位将被强制平仓。 在此方法下，你仍然可以增加或减少此仓位的保证金。</li>
+<li>没有逐仓的可以通过子账户实现</li>
+</ul>
+<h3 id="同时有买卖委托"><a href="#同时有买卖委托" class="headerlink" title="同时有买卖委托"></a>同时有买卖委托</h3><ul>
+<li>净买值需要保证金</li>
+<li>全部卖委托需要全额保证金</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B0%B8%E7%BB%AD%E5%90%88%E7%BA%A6Perpetual-Swap"><span class="toc-number">1.</span> <span class="toc-text">永续合约Perpetual Swap</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B5%84%E9%87%91%E8%B4%B9%E7%94%A8-funding"><span class="toc-number">1.1.</span> <span class="toc-text">资金费用 funding</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B5%84%E9%87%91%E8%B4%B9%E7%94%A8-%E4%BB%93%E4%BD%8D%E4%BB%B7%E5%80%BC-%E8%B5%84%E9%87%91%E8%B4%B9%E7%8E%87"><span class="toc-number">1.1.1.</span> <span class="toc-text">资金费用&#x3D;仓位价值*资金费率</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B5%84%E9%87%91%E8%B4%B9%E7%8E%87%E4%B8%BA%E6%AD%A3%EF%BC%8C%E5%A4%9A%E5%A4%B4%E5%90%91%E7%A9%BA%E5%A4%B4%E6%94%AF%E4%BB%98%EF%BC%9B%E4%B8%BA%E8%B4%9F%EF%BC%8C%E5%88%99%E7%A9%BA%E5%A4%B4%E5%90%91%E5%A4%9A%E5%A4%B4%E6%94%AF%E4%BB%98"><span class="toc-number">1.1.2.</span> <span class="toc-text">资金费率为正，多头向空头支付；为负，则空头向多头支付</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B5%84%E9%87%91%E8%B4%B9%E7%8E%87"><span class="toc-number">1.1.3.</span> <span class="toc-text">资金费率</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BA%A2%E4%BB%B7-%E6%8A%98%E4%BB%B7"><span class="toc-number">1.1.4.</span> <span class="toc-text">溢价&#x2F;折价</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%80%9F%E8%B4%B7%E5%88%A9%E7%8E%87"><span class="toc-number">1.1.5.</span> <span class="toc-text">借贷利率</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B4%B9%E7%94%A8%E5%91%A8%E6%9C%9F"><span class="toc-number">1.1.6.</span> <span class="toc-text">费用周期</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B5%84%E9%87%91%E8%B4%B9%E7%94%A8%E5%88%92%E8%BD%AC%E5%90%8E%E4%BA%A7%E7%94%9F%E5%B7%B2%E5%AE%9E%E7%8E%B0%E6%94%B6%E7%9B%8A"><span class="toc-number">1.1.7.</span> <span class="toc-text">资金费用划转后产生已实现收益</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B5%84%E9%87%91%E8%B4%B9%E7%94%A8%E5%88%92%E8%BD%AC%E5%90%8E%EF%BC%8C%E5%86%BB%E7%BB%93%E4%BF%9D%E8%AF%81%E9%87%91%E5%8F%8A%E7%88%86%E4%BB%93%E4%BB%B7%E5%8F%AF%E8%83%BD%E4%BC%9A%E5%8F%91%E7%94%9F%E5%8F%98%E5%8C%96"><span class="toc-number">1.1.8.</span> <span class="toc-text">资金费用划转后，冻结保证金及爆仓价可能会发生变化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%87%E8%AE%B0%E4%BB%B7%E6%A0%BCfair-price-mark"><span class="toc-number">1.2.</span> <span class="toc-text">标记价格fair price mark</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%81%BF%E5%85%8D%E5%9C%A8%E9%AB%98%E6%9D%A0%E6%9D%86%E4%BA%A7%E5%93%81%E4%B8%8A%E5%8F%91%E7%94%9F%E4%B8%8D%E5%BF%85%E8%A6%81%E7%9A%84%E5%BC%BA%E5%88%B6%E5%B9%B3%E4%BB%93"><span class="toc-number">1.2.1.</span> <span class="toc-text">避免在高杠杆产品上发生不必要的强制平仓</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%87%E6%95%B0%E4%BB%B7%E6%A0%BC"><span class="toc-number">1.2.2.</span> <span class="toc-text">指数价格</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97%EF%BC%9A%E6%8C%87%E6%95%B0%E4%BB%B7%E6%A0%BC%E5%8A%A0%E4%B8%8A%E9%9A%8F%E6%97%B6%E9%97%B4%E9%80%92%E5%87%8F%E7%9A%84%E8%B5%84%E9%87%91%E8%B4%B9%E7%94%A8%E5%9F%BA%E5%B7%AE"><span class="toc-number">1.2.3.</span> <span class="toc-text">计算：指数价格加上随时间递减的资金费用基差</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E4%BA%8E%E8%AE%A1%E7%AE%97%E6%9C%AA%E5%AE%9E%E7%8E%B0%E6%94%B6%E7%9B%8A"><span class="toc-number">1.2.4.</span> <span class="toc-text">用于计算未实现收益</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E4%BA%8E%E5%BC%BA%E5%88%B6%E5%B9%B3%E4%BB%93%E7%9A%84%E8%A7%A6%E5%8F%91%E4%BB%B7%E6%A0%BC"><span class="toc-number">1.2.5.</span> <span class="toc-text">用于强制平仓的触发价格</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A3%E5%90%91%E5%8F%8D%E5%90%91"><span class="toc-number">1.3.</span> <span class="toc-text">正向反向</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A3%E5%90%91%EF%BC%88%E7%BA%BF%E6%80%A7%EF%BC%89%EF%BC%9Ausd%E5%81%9A%E4%BF%9D%E8%AF%81%E9%87%91%E5%8F%8A%E6%94%B6%E7%9B%8A%E7%BB%93%E7%AE%97"><span class="toc-number">1.3.1.</span> <span class="toc-text">正向（线性）：usd做保证金及收益结算</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%8D%E5%90%91%EF%BC%9A%E6%A0%87%E7%9A%84%E7%89%A9btc%E5%81%9A%E4%BF%9D%E8%AF%81%E9%87%91%E5%8F%8A%E7%BB%93%E7%AE%97"><span class="toc-number">1.3.2.</span> <span class="toc-text">反向：标的物btc做保证金及结算</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%88%E7%BA%A6%E4%BA%A4%E6%98%93trade"><span class="toc-number">1.4.</span> <span class="toc-text">合约交易trade</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8B%E5%8D%95place-order"><span class="toc-number">1.4.1.</span> <span class="toc-text">下单place order</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A7%94%E6%89%98%E7%B1%BB%E5%9E%8Border-type"><span class="toc-number">1.4.2.</span> <span class="toc-text">委托类型order type</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%92%AE%E5%90%88match"><span class="toc-number">1.4.3.</span> <span class="toc-text">撮合match</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%88%E4%BA%8F%E8%AE%A1%E7%AE%97PNL"><span class="toc-number">1.4.4.</span> <span class="toc-text">盈亏计算PNL</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%8B%E7%BB%AD%E8%B4%B9%E7%8E%87fee"><span class="toc-number">1.5.</span> <span class="toc-text">手续费率fee</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#maker"><span class="toc-number">1.5.1.</span> <span class="toc-text">maker</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#taker"><span class="toc-number">1.5.2.</span> <span class="toc-text">taker</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%BA%E5%B9%B3%E8%B4%B9%E7%8E%87"><span class="toc-number">1.5.3.</span> <span class="toc-text">强平费率</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%82%E5%9C%BA%E4%B8%AD%E6%96%AD%E4%BA%8B%E4%BB%B6-MDE"><span class="toc-number">1.6.</span> <span class="toc-text">市场中断事件(MDE)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Market-Disruption-Event"><span class="toc-number">1.6.1.</span> <span class="toc-text">Market Disruption Event</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%BA%E5%88%B6%E5%B9%B3%E4%BB%93liquidated"><span class="toc-number">1.7.</span> <span class="toc-text">强制平仓liquidated</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B9%B3%E4%BB%93%E4%BB%B7%E6%A0%BC"><span class="toc-number">1.7.1.</span> <span class="toc-text">平仓价格</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%BA%E5%B9%B3%E8%BF%87%E7%A8%8B"><span class="toc-number">1.7.2.</span> <span class="toc-text">强平过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A9%BF%E4%BB%93"><span class="toc-number">1.7.3.</span> <span class="toc-text">穿仓</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%9D%E9%99%A9%E5%9F%BA%E9%87%91"><span class="toc-number">1.7.4.</span> <span class="toc-text">保险基金</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%8A%A8%E5%87%8F%E4%BB%93"><span class="toc-number">1.7.5.</span> <span class="toc-text">自动减仓</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%9A%84%E4%BA%A4%E6%98%93%E8%AE%B0%E5%BD%95"><span class="toc-number">1.7.6.</span> <span class="toc-text">用户的交易记录</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%9D%E8%AF%81%E9%87%91margin"><span class="toc-number">1.8.</span> <span class="toc-text">保证金margin</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B5%B7%E5%A7%8B%E4%BF%9D%E8%AF%81%E9%87%91"><span class="toc-number">1.8.1.</span> <span class="toc-text">起始保证金</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%B4%E6%8C%81%E4%BF%9D%E8%AF%81%E9%87%91"><span class="toc-number">1.8.2.</span> <span class="toc-text">维持保证金</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A3%8E%E9%99%A9%E9%99%90%E9%A2%9D"><span class="toc-number">1.8.3.</span> <span class="toc-text">风险限额</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%A8%E4%BB%93%E9%80%90%E4%BB%93"><span class="toc-number">1.8.4.</span> <span class="toc-text">全仓逐仓</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8C%E6%97%B6%E6%9C%89%E4%B9%B0%E5%8D%96%E5%A7%94%E6%89%98"><span class="toc-number">1.8.5.</span> <span class="toc-text">同时有买卖委托</span></a></li></ol></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/&text=Perpetual Swap"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/&title=Perpetual Swap"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/&is_video=false&description=Perpetual Swap"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Perpetual Swap&body=Check out this article: https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/&title=Perpetual Swap"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/&title=Perpetual Swap"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/&title=Perpetual Swap"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/&title=Perpetual Swap"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/&name=Perpetual Swap&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://github.com/applefighting/applefighting.github.io.git/2020/04/14/Perpetual-Swap/&t=Perpetual Swap"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2018-2020
+    Jason Li
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-34E22GBZP6"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-34E22GBZP6');
+    </script>
+
+<!-- Baidu Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
